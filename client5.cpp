@@ -1,22 +1,21 @@
 #include<iostream>
 #include<sys/types.h>
 #include<sys/socket.h>
-#include<sys/un.h>
+#include<netinet/in.h>
+#include<arpa/inet.h>
 #include<unistd.h>
 
 int main()
 {
     int sockfd;
     int len;
-    struct sockaddr_un address;
+    struct sockaddr_in address;
     int result;
-    int ch = 3;
-
-    // tao socket cho trinh khach. luu lai so mo ta socket
-    sockfd=socket(AF_UNIX,SOCK_STREAM,0);
-    address.sun_family=AF_UNIX;
-    // gan ten socket tren may chu can ket noi
-    strcpy(address.sun_path,"server_socket");
+    char ch = 'A';
+    sockfd=socket(AF_INET, SOCK_STREAM, 0);
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = htonl(INADDR_ANY);
+    address.sin_port=htons(9734);
     len =sizeof(address);
     // thu hien ket noi
     result = connect(sockfd,(struct sockaddr *)&address,len);
@@ -26,10 +25,13 @@ int main()
         exit(EXIT_FAILURE);
     }
     // sau khi ket noi, doc ghi du lieu nhu tren file
-    write(sockfd, &ch,1);
-    sleep(1);
-    read(sockfd, &ch,1);
-    printf("int from server = %d\n",ch);
+    //write(sockfd, &ch,1);
+    send(sockfd,&ch,sizeof(ch),0);
+    //sleep(1);
+    //read(sockfd, &ch,1);
+    recv(sockfd,&ch,sizeof(ch),0);
+    printf("from server = %s\n",ch);
+    
     close(sockfd);
     exit(0);
 }
